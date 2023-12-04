@@ -2,6 +2,7 @@ package abcicli
 
 import (
 	types "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cometbft/cometbft/libs/service"
 	cmtsync "github.com/cometbft/cometbft/libs/sync"
 )
@@ -98,10 +99,17 @@ func (app *localClient) CheckTxAsync(req types.RequestCheckTx) *ReqRes {
 }
 
 func (app *localClient) QueryAsync(req types.RequestQuery) *ReqRes {
+	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
+	logger.Info("QueryAsync")
+	logger.Info("QueryAsync.req", req)
+	logger.Info("QueryAsync.aqcuiring lock")
+
 	app.mtx.Lock()
 	defer app.mtx.Unlock()
 
 	res := app.Application.Query(req)
+	logger.Info("QueryAsync.res", res)
+	logger.Info("QueryAsync.returning and releasing lock")
 	return app.callback(
 		types.ToRequestQuery(req),
 		types.ToResponseQuery(res),
@@ -253,10 +261,17 @@ func (app *localClient) CheckTxSync(req types.RequestCheckTx) (*types.ResponseCh
 }
 
 func (app *localClient) QuerySync(req types.RequestQuery) (*types.ResponseQuery, error) {
+	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
+	logger.Info("QuerySync")
+	logger.Info("QuerySync.req", req)
+	logger.Info("QuerySync.aqcuiring lock")
+
 	app.mtx.Lock()
 	defer app.mtx.Unlock()
 
 	res := app.Application.Query(req)
+	logger.Info("QuerySync.res", res)
+	logger.Info("QuerySync.returning and releasing lock")
 	return &res, nil
 }
 
